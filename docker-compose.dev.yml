@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: safecall-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: safecall
+      MYSQL_USER: safecall
+      MYSQL_PASSWORD: safecall1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - safecall-mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7.2
+    container_name: safecall-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  safecall-mysql-data:

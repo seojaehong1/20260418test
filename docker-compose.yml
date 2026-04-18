@@ -1,0 +1,52 @@
+services:
+  app:
+    build: .
+    container_name: safecall-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_NAME: safecall
+      DB_USER: safecall
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  mysql:
+    image: mysql:8.0
+    container_name: safecall-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: safecall
+      MYSQL_USER: safecall
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - safecall-mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7.2
+    container_name: safecall-redis
+    restart: unless-stopped
+    volumes:
+      - safecall-redis-data:/data
+
+volumes:
+  safecall-mysql-data:
+  safecall-redis-data:
